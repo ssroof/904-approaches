@@ -2,16 +2,20 @@
 #   Data Cleaning
 # ----------------------------------------------------
 
+
 library("here")
 library("magrittr")
 library("tidyverse")
+library("naniar")
 
 
 pilot <- read_csv(here("data", "anes_pilot_2019.csv"))
 pilot
 
-slim_pilot <- pilot %>%
+
+slim_pilot <- as_tibble(pilot) %>%
   select(
+    caseid,
     ftjournal,
     dont_care = pop2,
     trustworthy = pop3,
@@ -60,9 +64,11 @@ slim_pilot <- pilot %>%
   )
 
 
+
 # ----------------------------------------------------
 #   Codebook
 # ----------------------------------------------------
+
 
 # ftjournal: How would you rate journalists?
   # feeling thermometer, 0-100
@@ -153,13 +159,228 @@ slim_pilot <- pilot %>%
 # - How often do you use ____ ?
   # many times every day (1), a few times every day (2), about once a day (3),
   # a few times each week (4), about once a week (5), once or twice a month (6),
-  # less than once a month (7), incapplicable, legitimate skip (-1)
+  # less than once a month (7), inapplicable, legitimate skip (-1)
 # - When using ____, how often do you come across information about political issues or candidates?
   # always (1), most of the time (2), about half of the time (3), sometimes (4), never (5),
   # inapplicable, legitimate skip (-1)
 # - When using ____, how often do you post information about political issues or candidates?
   # always (1), most of the time (2), about half of the time (3), sometimes (4), never (5),
   # no answer (-7), inapplicable, legitimate skip (-1)
+
+
+
+# ----------------------------------------------------
+#   Create Variables
+# ----------------------------------------------------
+
+
+na_strings <- c(-1, -7)
+
+
+slim_pilot <- slim_pilot %>%
+  replace_with_na_all(condition = ~.x %in% na_strings)
+
+
+
+# Distrust Variable: ftjournal, dont_care, trustworthy, experts, restrict, science, exphelp
+# - ftjournal: distrust (0-33), neutral (34-65), trust (66-100)
+# - dont_care: distrust (1 and 2), neutral (3), trust (4 and 5)
+# - trustworthy: distrust (4 and 5), neutral (3), trust (1 and 2)
+# - experts: distrust (1 and 2), neutral (3), trust (4 and 5)
+# - restrict: distrust (1, 2, and 3), neutral (4), trust (5, 6, and 7)
+# - science: distrust (1 and 2), neutral (3), trust (4 and 5)
+# - exphelp: distrust (1 and 2), neutral (3), trust (4 and 5)
+
+
+slim_pilot <- slim_pilot %>%
+  mutate(
+    distrust_ftjournal = case_when(
+      ftjournal <= 33 ~ "distrust",
+      ftjournal >= 66 ~ "trust",
+      TRUE ~ "neutral"
+    ),
+    distrust_dont_care = case_when(
+      dont_care <= 2 ~ "distrust",
+      dont_care == 3 ~ "neutral",
+      dont_care >= 4 ~ "trust"
+    ),
+    distrust_trustworthy = case_when(
+      trustworthy >= 4 ~ "distrust",
+      trustworthy == 3 ~ "neutral",
+      trustworthy <= 2 ~ "trust"
+    ),
+    distrust_experts = case_when(
+      experts <= 2 ~ "distrust",
+      experts == 3 ~ "neutral",
+      experts >= 4 ~ "trust"
+    ),
+    distrust_restrict = case_when(
+      restrict <= 3 ~ "distrust",
+      restrict == 4 ~ "neutral",
+      restrict >= 5 ~ "trust"
+    ),
+    distrust_science = case_when(
+      science <= 2 ~ "distrust",
+      science == 3 ~ "neutral",
+      science >= 4 ~ "trust"
+    ),
+    distrust_exphelp = case_when(
+      exphelp <= 2 ~ "distrust",
+      exphelp == 3 ~ "neutral",
+      exphelp >= 4 ~ "trust"
+    )
+  )
+
+
+slim_pilot <- slim_pilot %>%
+  group_by(caseid) %>%
+  mutate(
+    distrust_score = sum(distrust_ftjournal == "distrust",
+                     distrust_dont_care == "distrust",
+                     distrust_trustworthy == "distrust",
+                     distrust_experts == "distrust",
+                     distrust_restrict == "distrust",
+                     distrust_science == "distrust",
+                     distrust_exphelp == "distrust"
+    ),
+    trust_score = sum(distrust_ftjournal == "trust",
+                               distrust_dont_care == "trust",
+                               distrust_trustworthy == "trust",
+                               distrust_experts == "trust",
+                               distrust_restrict == "trust",
+                               distrust_science == "trust",
+                               distrust_exphelp == "trust"
+    )
+  )
+
+
+
+# Conspiracy Variable: controlled, secret, lies
+# - controlled: believe (4 and 5), neutral (3), don't believe (1 and 2)
+# - secret: believe (1 and 2), neutral (3), don't believe (4 and 5)
+# - lies: believe (4 and 5), neutral (3), don't believe (1 and 2)
+
+
+slim_pilot <- slim_pilot %>%
+  mutate(
+    believe_controlled = case_when(
+      controlled >= 4 ~ "believe",
+      controlled == 3 ~ "neutral",
+      controlled <= 2 ~ "dont"
+    ),
+    believe_secret =  case_when(
+      secret <= 2 ~ "believe",
+      secret == 3 ~ "neutral",
+      secret >= 4 ~ "dont"
+    ),
+    believe_lies = case_when(
+      lies >= 4 ~ "believe",
+      lies == 3 ~ "neutral",
+      lies <= 2 ~ "dont"
+    )
+  )
+
+
+slim_pilot <- slim_pilot %>%
+  group_by(caseid) %>%
+  mutate(
+    conspire_score = sum(believe_controlled == "believe",
+                         believe_secret == "believe",
+                         believe_lies == "believe"
+    ),
+    truth_score = sum(believe_controlled == "dont",
+                      believe_secret == "dont",
+                      believe_lies == "dont"
+    )
+  )
+
+
+
+# Misinformation: unemp, interfere, autism, gmo, warm, illegal
+# - unemp: misinformed (1), informed (2)
+# - interfere: misinformed (2), informed (1)
+# - autism: misinformed (1), informed (2)
+# - gmo: misinformed (2), informed (1)
+# - warm: misinformed (2), informed (1)
+# - illegal: misinformed (1), informed (2)
+
+
+slim_pilot <- slim_pilot %>%
+  mutate(
+    inform_unemp = case_when(
+      unemp == 1 ~ "misinformed",
+      unemp == 2 ~ "informed"
+    ),
+    inform_interfere = case_when(
+      interfere == 2 ~ "misinformed",
+      interfere == 1 ~ "informed"
+    ),
+    inform_autism = case_when(
+      autism == 1 ~ "misinformed",
+      autism == 2 ~ "informed"
+    ),
+    inform_gmo = case_when(
+      gmo == 2 ~ "misinformed",
+      gmo == 1 ~ "informed"
+    ),
+    inform_warm = case_when(
+      warm == 2 ~ "misinformed",
+      warm == 1 ~ "informed"
+    ),
+    inform_illegal = case_when(
+      illegal == 1 ~ "misinformed",
+      illegal == 2 ~ "informed"
+    )
+  )
+
+
+slim_pilot <- slim_pilot %>%
+  group_by(caseid) %>%
+  mutate(
+    misinformed_score = sum(inform_unemp == "misinformed",
+                         inform_interfere == "misinformed",
+                         inform_autism == "misinformed",
+                         inform_gmo == "misinformed",
+                         inform_warm == "misinformed",
+                         inform_illegal == "misinformed"
+    ),
+    informed_score = sum(inform_unemp == "informed",
+                         inform_interfere == "informed",
+                         inform_autism == "informed",
+                         inform_gmo == "informed",
+                         inform_warm == "informed",
+                         inform_illegal == "informed"
+    )
+  )
+
+
+
+# Activity (how active users are):
+# - Active politically engaged user: uses often and posts political content
+  # selected (1) in facebook, ..., tiktok *AND*
+  # selected (1-4) in facebook1, ..., tiktok1 *AND*
+  # selected (1-3) in facebook3, ..., tiktok3
+# - Active politically disengaged user: uses often and does not post political content
+  # selected (1) in facebook, ..., tiktok *AND*
+  # selected (1-4) in facebook1, ..., tiktok1 *AND*
+  # selected (4 and 5) in facebook3, ..., tiktok3
+# - Inactive user: does not use often
+  # selected (1) in facebook, ..., tiktok *AND*
+  # selected (5-7) in facebook1, ..., tiktok1
+# - Not a user:
+  # selected (2) in facebook, ..., tiktok
+# - Political engagement of platform:
+  # selected (1-3) in facebook2, ..., tiktok2 = Present
+  # selected (1-3) in facebook3, ..., tiktok3 = Present
+  # selected (4 and 5) in facebook2, ..., tiktok2 = Not present
+  # selected (4 and 5) in facebook3, ..., tiktok3 = Not present
+
+
+
+
+
+
+
 
 
 
