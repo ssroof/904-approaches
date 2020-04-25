@@ -149,7 +149,7 @@ slim_pilot <- as_tibble(pilot) %>%
 # party_id: "Generally speaking, do you usually think of yourself as a Democrat,
 #   a Republican, an independent, or what?"
   # Democrat (1), Republican (2), Independent (3), Something else (4), No answer (-7),
-  # Inapplicable, legisimate skip (-1)
+  # Inapplicable, legitimate skip (-1)
 
 # facebook, ..., tiktok
 # - Visited social media platform in the past year
@@ -355,32 +355,196 @@ slim_pilot <- slim_pilot %>%
 
 
 
+# Social Media Variables
+
 # Activity (how active users are):
 # - Active politically engaged user: uses often and posts political content
-  # selected (1) in facebook, ..., tiktok *AND*
-  # selected (1-4) in facebook1, ..., tiktok1 *AND*
-  # selected (1-3) in facebook3, ..., tiktok3
+# selected (1-4) in facebook1, ..., tiktok1 *AND*
+# selected (1-3) in facebook3, ..., tiktok3
 # - Active politically disengaged user: uses often and does not post political content
-  # selected (1) in facebook, ..., tiktok *AND*
-  # selected (1-4) in facebook1, ..., tiktok1 *AND*
-  # selected (4 and 5) in facebook3, ..., tiktok3
+# selected (1-4) in facebook1, ..., tiktok1 *AND*
+# selected (4 and 5) in facebook3, ..., tiktok3
 # - Inactive user: does not use often
-  # selected (1) in facebook, ..., tiktok *AND*
-  # selected (5-7) in facebook1, ..., tiktok1
+# selected (5-7) in facebook1, ..., tiktok1
 # - Not a user:
-  # selected (2) in facebook, ..., tiktok
+# selected (2) in facebook, ..., tiktok
+
+
+# Activity
+
+slim_pilot <- slim_pilot %>%
+  mutate(
+    fb_activity = case_when(
+      facebook1 <= 4 ~ "active",
+      facebook1 >= 5 ~ "inactive"
+    ),
+    twit_activity = case_when(
+      twitter1 <= 4 ~ "active",
+      twitter1 >= 5 ~ "inactive"
+    ),
+    ig_activity = case_when(
+      instagram1 <= 4 ~ "active",
+      instagram1 >= 5 ~ "inactive"
+    ),
+    red_activity = case_when(
+      reddit1 <= 4 ~ "active",
+      reddit1 >= 5 ~ "inactive"
+    ),
+    yout_activity = case_when(
+      youtube1 <= 4 ~ "active",
+      youtube1 >= 5 ~ "inactive"
+    ),
+    sc_activity = case_when(
+      snapchat1 <= 4 ~ "active",
+      snapchat1 >= 5 ~ "inactive"
+    ),
+    tt_activity = case_when(
+      tiktok1 <= 4 ~ "active",
+      tiktok1 >= 5 ~ "inactive"
+    )
+  )
+
+
+# Engagement
+
+slim_pilot <- slim_pilot %>%
+  mutate(
+    fb_engage = case_when(
+      facebook3 <= 3 ~ "engaged",
+      facebook3 >= 4 ~ "unengaged"
+    ),
+    twit_engage = case_when(
+      twitter3 <= 3 ~ "engaged",
+      twitter3 >= 4 ~ "unengaged"
+    ),
+    ig_engage = case_when(
+      instagram3 <= 3 ~ "engaged",
+      instagram3 >= 4 ~ "unengaged"
+    ),
+    red_engage = case_when(
+      reddit3 <= 3 ~ "engaged",
+      reddit3 >= 4 ~ "unengaged"
+    ),
+    yout_engage = case_when(
+      youtube3 <= 3 ~ "engaged",
+      youtube3 >= 4 ~ "unengaged"
+    ),
+    sc_engage = case_when(
+      snapchat3 <= 3 ~ "engaged",
+      snapchat3 >= 4 ~ "unengaged"
+    ),
+    tt_engage = case_when(
+      tiktok3 <= 3 ~ "engaged",
+      tiktok3 >= 4 ~ "unengaged"
+    )
+  )
+
+
+# Active engaged: act_eng
+# Active unengaged: act_uneng
+# Inactive: inact_user
+# Not online: offline
+
+slim_pilot <- slim_pilot %>%
+  group_by(caseid) %>%
+  mutate(
+    user_type = case_when(
+      (fb_activity == "active" |
+         twit_activity == "active" |
+         ig_activity == "active" |
+         red_activity == "active" |
+         yout_activity == "active" |
+         sc_activity == "active" |
+         tt_activity == "active") &
+      (fb_engage == "engaged" |
+         twit_engage == "engaged" |
+         ig_engage == "engaged" |
+         red_engage == "engaged" |
+         yout_engage == "engaged" |
+         sc_engage == "engaged" |
+         tt_engage == "engaged") ~ "act_eng",
+      (fb_activity == "active" |
+         twit_activity == "active" |
+         ig_activity == "active" |
+         red_activity == "active" |
+         yout_activity == "active" |
+         sc_activity == "active" |
+         tt_activity == "active") &
+      (fb_engage == "unengaged" |
+         twit_engage == "unengaged" |
+         ig_engage == "unengaged" |
+         red_engage == "unengaged" |
+         yout_engage == "unengaged" |
+         sc_engage == "unengaged" |
+         tt_engage == "unengaged") ~ "act_uneng",
+      (fb_activity == "inactive" |
+         twit_activity == "inactive" |
+         ig_activity == "inactive" |
+         red_activity == "inactive" |
+         yout_activity == "inactive" |
+         sc_activity == "inactive" |
+         tt_activity == "inactive") ~ "inact_user",
+      (facebook == 2 &
+         twitter == 2 &
+         instagram == 2 &
+         reddit == 2 &
+         youtube == 2 &
+         snapchat == 2 &
+         tiktok == 2) ~ "offline"
+    )
+  )
+
+
+
+# ----------------------------------------------------
+#   Final Dataset
+# ----------------------------------------------------
+
+
+final <- as_tibble(slim_pilot) %>%
+  select(
+    caseid,
+    party_id,
+    facebook2,
+    twitter2,
+    instagram2,
+    reddit2,
+    youtube2,
+    snapchat2,
+    tiktok2,
+    distrust_score,
+    trust_score,
+    conspire_score,
+    truth_score,
+    misinformed_score,
+    informed_score,
+    fb_activity,
+    twit_activity,
+    ig_activity,
+    red_activity,
+    yout_activity,
+    sc_activity,
+    tt_activity,
+    fb_engage,
+    twit_engage,
+    ig_engage,
+    red_engage,
+    yout_engage,
+    sc_engage,
+    tt_engage,
+    user_type
+  )
+
+
+
+
+
+
+
 # - Political engagement of platform:
   # selected (1-3) in facebook2, ..., tiktok2 = Present
   # selected (1-3) in facebook3, ..., tiktok3 = Present
   # selected (4 and 5) in facebook2, ..., tiktok2 = Not present
   # selected (4 and 5) in facebook3, ..., tiktok3 = Not present
-
-
-
-
-
-
-
-
 
 
