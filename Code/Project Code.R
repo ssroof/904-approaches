@@ -7,6 +7,7 @@ library("here")
 library("magrittr")
 library("tidyverse")
 library("naniar")
+library("broom")
 
 
 pilot <- read_csv(here("data", "anes_pilot_2019.csv"))
@@ -505,6 +506,13 @@ final <- as_tibble(slim_pilot) %>%
   select(
     caseid,
     party_id,
+    facebook,
+    twitter,
+    instagram,
+    reddit,
+    youtube,
+    snapchat,
+    tiktok,
     facebook2,
     twitter2,
     instagram2,
@@ -537,14 +545,205 @@ final <- as_tibble(slim_pilot) %>%
 
 
 
+# ----------------------------------------------------
+#   Toxicity Scoring
+# ----------------------------------------------------
+
+
+# Toxicity Score
+
+final <- final %>%
+  group_by(caseid) %>%
+  mutate(
+    toxicity_score = sum(distrust_score, conspire_score, misinformed_score, na.rm = TRUE)
+  )
+
+
+# Facebook / By User Type
+
+final %>%
+  group_by(facebook) %>%
+  filter(facebook == 1) %>%
+  summarize(
+    mean_fb = mean(toxicity_score)
+  )
+
+final %>%
+  group_by(user_type) %>%
+  filter(facebook == 1) %>%
+  summarize(
+    mean_fb = mean(toxicity_score)
+  )
+
+
+# Twitter / By User Type
+
+final %>%
+  group_by(twitter) %>%
+  filter(twitter == 1) %>%
+  summarize(
+    mean_twit = mean(toxicity_score)
+  )
+
+final %>%
+  group_by(user_type) %>%
+  filter(twitter == 1) %>%
+  summarize(
+    mean_twit = mean(toxicity_score)
+  )
+
+
+# Instagram / By User Type
+
+final %>%
+  group_by(instagram) %>%
+  filter(instagram == 1) %>%
+  summarize(
+    mean_ig = mean(toxicity_score)
+  )
+
+final %>%
+  group_by(user_type) %>%
+  filter(instagram == 1) %>%
+  summarize(
+    mean_ig = mean(toxicity_score)
+  )
+
+
+# Reddit / By User Type
+
+final %>%
+  group_by(reddit) %>%
+  filter(reddit == 1) %>%
+  summarize(
+    mean_red = mean(toxicity_score)
+  )
+
+final %>%
+  group_by(user_type) %>%
+  filter(reddit == 1) %>%
+  summarize(
+    mean_red = mean(toxicity_score)
+  )
+
+
+# YouTube / By User Type
+
+final %>%
+  group_by(youtube) %>%
+  filter(youtube == 1) %>%
+  summarize(
+    mean_you = mean(toxicity_score)
+  )
+
+final %>%
+  group_by(user_type) %>%
+  filter(youtube == 1) %>%
+  summarize(
+    mean_you = mean(toxicity_score)
+  )
+
+
+# Snapchat / By User Type
+
+final %>%
+  group_by(snapchat) %>%
+  filter(snapchat == 1) %>%
+  summarize(
+    mean_sc = mean(toxicity_score)
+  )
+
+final %>%
+  group_by(user_type) %>%
+  filter(snapchat == 1) %>%
+  summarize(
+    mean_sc = mean(toxicity_score)
+  )
+
+
+# TikTok / By User Type
+
+final %>%
+  group_by(tiktok) %>%
+  filter(tiktok == 1) %>%
+  summarize(
+    mean_tt = mean(toxicity_score)
+  )
+
+final %>%
+  group_by(user_type) %>%
+  filter(tiktok == 1) %>%
+  summarize(
+    mean_tt = mean(toxicity_score)
+  )
+
+
+
+# ----------------------------------------------------
+#   Data Analysis
+# ----------------------------------------------------
+
+
+ggplot(final) +
+  aes(y = toxicity_score) +
+  geom_smooth(aes(x = facebook), method = "lm", se = FALSE, color = "red") +
+  geom_smooth(aes(x = twitter), method = "lm", se = FALSE, color = "orange") +
+  geom_smooth(aes(x = instagram), method = "lm", se = FALSE, color = "yellow") +
+  geom_smooth(aes(x = reddit), method = "lm", se = FALSE, color = "green") +
+  geom_smooth(aes(x = youtube), method = "lm", se = FALSE, color = "blue") +
+  geom_smooth(aes(x = snapchat), method = "lm", se = FALSE, color = "purple") +
+  geom_smooth(aes(x = tiktok), method = "lm", se = FALSE, color = "pink")
+
+
+fb_reg <- tidy(lm(toxicity_score ~ facebook + party_id, data = final))
+
+twit_reg <- tidy(lm(toxicity_score ~ twitter + party_id, data = final))
+
+ig_reg <- tidy(lm(toxicity_score ~ instagram + party_id, data = final))
+
+red_reg <- tidy(lm(toxicity_score ~ reddit + party_id, data = final))
+
+you_reg <- tidy(lm(toxicity_score ~ youtube + party_id, data = final))
+
+sc_reg <- tidy(lm(toxicity_score ~ snapchat + party_id, data = final))
+
+tt_reg <- tidy(lm(toxicity_score ~ tiktok + party_id, data = final))
+
+
+stacked_models <- 
+  bind_rows(
+    "Facebook" = tidy(fb_reg, conf.int = TRUE),
+    "Twitter" = tidy(twit_reg, conf.int = TRUE),
+    "Instagram" = tidy(ig_reg, conf.int = TRUE),
+    "Reddit" = tidy(red_reg, conf.int = TRUE),
+    "YouTube" = tidy(you_reg, conf.int = TRUE),
+    "Snapchat" = tidy(sc_reg, conf.int = TRUE),
+    "TikTok" = tidy(tt_reg, conf.int = TRUE),
+    .id = "Platform"
+  ) %>%
+  print()
+
+
+ggplot(stacked_models) +
+  aes(x = term, y = estimate, color = Platform) +
+  geom_pointrange(
+    aes(ymin = conf.low, ymax = conf.high),
+    position = position_dodge(width = -0.5)
+  ) +
+  coord_flip()
+
+
+
 
 
 
 
 # - Political engagement of platform:
-  # selected (1-3) in facebook2, ..., tiktok2 = Present
-  # selected (1-3) in facebook3, ..., tiktok3 = Present
-  # selected (4 and 5) in facebook2, ..., tiktok2 = Not present
-  # selected (4 and 5) in facebook3, ..., tiktok3 = Not present
+# selected (1-3) in facebook2, ..., tiktok2 = Present
+# selected (1-3) in facebook3, ..., tiktok3 = Present
+# selected (4 and 5) in facebook2, ..., tiktok2 = Not present
+# selected (4 and 5) in facebook3, ..., tiktok3 = Not present
+
+
 
 
