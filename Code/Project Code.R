@@ -1019,6 +1019,156 @@ final %>%
   )
 
 
+# Toxicity Score
+
+ggplot(final, aes(x = "", y = toxicity_score)) +
+  geom_boxplot(alpha = 0.7, na.rm = TRUE) +
+  stat_summary(fun.y = mean, geom = "point", shape = 20, size = 5,
+               color = "red", fill = "red", na.rm = TRUE) +
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Set1") +
+  xlab(NULL) + 
+  ylab(NULL) +
+  ggtitle("Toxicity Score") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+# Toxicity Score by Platform
+
+# - facebook
+ggplot(final, aes(x = facebook, y = toxicity_score, group = facebook)) +
+  geom_boxplot(alpha=0.7, na.rm = TRUE) +
+  stat_summary(fun.y = mean, geom = "point", shape = 20, size = 5,
+               color = "red", fill= "red", na.rm = TRUE) +
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Set1") +
+  xlab(NULL) + 
+  ylab(NULL) +
+  ggtitle("Toxicity Score: Facebook") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+final %>%
+  group_by(facebook) %>%
+  filter(facebook == 1) %>%
+  summarize(
+    mean = mean(toxicity_score, na.rm = TRUE)
+  )
+
+# - twitter
+ggplot(final, aes(x = twitter, y = toxicity_score, group = twitter)) +
+  geom_boxplot(alpha=0.7, na.rm = TRUE) +
+  stat_summary(fun.y = mean, geom = "point", shape = 20, size = 5,
+               color = "red", fill= "red", na.rm = TRUE) +
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Set1") +
+  xlab(NULL) + 
+  ylab(NULL) +
+  ggtitle("Toxicity Score: Twitter") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+final %>%
+  group_by(twitter) %>%
+  filter(twitter == 1) %>%
+  summarize(
+    mean = mean(toxicity_score, na.rm = TRUE)
+  )
+
+# - instagram
+ggplot(final, aes(x = instagram, y = toxicity_score, group = instagram)) +
+  geom_boxplot(alpha=0.7, na.rm = TRUE) +
+  stat_summary(fun.y = mean, geom = "point", shape = 20, size = 5,
+               color = "red", fill= "red", na.rm = TRUE) +
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Set1") +
+  xlab(NULL) + 
+  ylab(NULL) +
+  ggtitle("Toxicity Score: Instagram") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+final %>%
+  group_by(instagram) %>%
+  filter(instagram == 1) %>%
+  summarize(
+    mean = mean(toxicity_score, na.rm = TRUE)
+  )
+
+# - reddit
+ggplot(final, aes(x = reddit, y = toxicity_score, group = reddit)) +
+  geom_boxplot(alpha=0.7, na.rm = TRUE) +
+  stat_summary(fun.y = mean, geom = "point", shape = 20, size = 5,
+               color = "red", fill= "red", na.rm = TRUE) +
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Set1") +
+  xlab(NULL) + 
+  ylab(NULL) +
+  ggtitle("Toxicity Score: Reddit") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+final %>%
+  group_by(reddit) %>%
+  filter(reddit == 1) %>%
+  summarize(
+    mean = mean(toxicity_score, na.rm = TRUE)
+  )
+
+# - youtube
+ggplot(final, aes(x = youtube, y = toxicity_score, group = youtube)) +
+  geom_boxplot(alpha=0.7, na.rm = TRUE) +
+  stat_summary(fun.y = mean, geom = "point", shape = 20, size = 5,
+               color = "red", fill= "red", na.rm = TRUE) +
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Set1") +
+  xlab(NULL) + 
+  ylab(NULL) +
+  ggtitle("Toxicity Score: YouTube") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+final %>%
+  group_by(youtube) %>%
+  filter(youtube == 1) %>%
+  summarize(
+    mean = mean(toxicity_score, na.rm = TRUE)
+  )
+
+# - snapchat
+ggplot(final, aes(x = snapchat, y = toxicity_score, group = snapchat)) +
+  geom_boxplot(alpha=0.7, na.rm = TRUE) +
+  stat_summary(fun.y = mean, geom = "point", shape = 20, size = 5,
+               color = "red", fill= "red", na.rm = TRUE) +
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Set1") +
+  xlab(NULL) + 
+  ylab(NULL) +
+  ggtitle("Toxicity Score: Snapchat") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+final %>%
+  group_by(snapchat) %>%
+  filter(snapchat == 1) %>%
+  summarize(
+    mean = mean(toxicity_score, na.rm = TRUE)
+  )
+
+# - tiktok
+ggplot(final, aes(x = tiktok, y = toxicity_score, group = tiktok)) +
+  geom_boxplot(alpha=0.7, na.rm = TRUE) +
+  stat_summary(fun.y = mean, geom = "point", shape = 20, size = 5,
+               color = "red", fill= "red", na.rm = TRUE) +
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Set1") +
+  xlab(NULL) + 
+  ylab(NULL) +
+  ggtitle("Toxicity Score: TikTok") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+final %>%
+  group_by(tiktok) %>%
+  filter(tiktok == 1) %>%
+  summarize(
+    mean = mean(toxicity_score, na.rm = TRUE)
+  )
+
+
 # User Type
 
 ggplot(final, aes(x = user_type)) +
@@ -1033,18 +1183,11 @@ ggplot(final, aes(x = user_type)) +
 
 
 # ----------------------------------------------------
-#   Toxicity Scoring
+#   Platform Toxicity Scoring by User Type
 # ----------------------------------------------------
 
 
 # Facebook / By User Type
-
-final %>%
-  group_by(facebook) %>%
-  filter(facebook == 1) %>%
-  summarize(
-    mean_fb = mean(toxicity_score)
-  )
 
 final %>%
   group_by(user_type) %>%
@@ -1057,13 +1200,6 @@ final %>%
 # Twitter / By User Type
 
 final %>%
-  group_by(twitter) %>%
-  filter(twitter == 1) %>%
-  summarize(
-    mean_twit = mean(toxicity_score)
-  )
-
-final %>%
   group_by(user_type) %>%
   filter(twitter == 1) %>%
   summarize(
@@ -1072,13 +1208,6 @@ final %>%
 
 
 # Instagram / By User Type
-
-final %>%
-  group_by(instagram) %>%
-  filter(instagram == 1) %>%
-  summarize(
-    mean_ig = mean(toxicity_score)
-  )
 
 final %>%
   group_by(user_type) %>%
@@ -1091,13 +1220,6 @@ final %>%
 # Reddit / By User Type
 
 final %>%
-  group_by(reddit) %>%
-  filter(reddit == 1) %>%
-  summarize(
-    mean_red = mean(toxicity_score)
-  )
-
-final %>%
   group_by(user_type) %>%
   filter(reddit == 1) %>%
   summarize(
@@ -1106,13 +1228,6 @@ final %>%
 
 
 # YouTube / By User Type
-
-final %>%
-  group_by(youtube) %>%
-  filter(youtube == 1) %>%
-  summarize(
-    mean_you = mean(toxicity_score)
-  )
 
 final %>%
   group_by(user_type) %>%
@@ -1125,13 +1240,6 @@ final %>%
 # Snapchat / By User Type
 
 final %>%
-  group_by(snapchat) %>%
-  filter(snapchat == 1) %>%
-  summarize(
-    mean_sc = mean(toxicity_score)
-  )
-
-final %>%
   group_by(user_type) %>%
   filter(snapchat == 1) %>%
   summarize(
@@ -1142,13 +1250,6 @@ final %>%
 # TikTok / By User Type
 
 final %>%
-  group_by(tiktok) %>%
-  filter(tiktok == 1) %>%
-  summarize(
-    mean_tt = mean(toxicity_score)
-  )
-
-final %>%
   group_by(user_type) %>%
   filter(tiktok == 1) %>%
   summarize(
@@ -1158,34 +1259,67 @@ final %>%
 
 
 # ----------------------------------------------------
-#   Data Analysis
+#   Model Analysis
 # ----------------------------------------------------
 
 
-ggplot(final) +
-  aes(y = toxicity_score) +
-  geom_smooth(aes(x = facebook), method = "lm", se = FALSE, color = "red") +
-  geom_smooth(aes(x = twitter), method = "lm", se = FALSE, color = "orange") +
-  geom_smooth(aes(x = instagram), method = "lm", se = FALSE, color = "yellow") +
-  geom_smooth(aes(x = reddit), method = "lm", se = FALSE, color = "green") +
-  geom_smooth(aes(x = youtube), method = "lm", se = FALSE, color = "blue") +
-  geom_smooth(aes(x = snapchat), method = "lm", se = FALSE, color = "purple") +
-  geom_smooth(aes(x = tiktok), method = "lm", se = FALSE, color = "pink")
+ggplot(final, aes(y = toxicity_score)) +
+  geom_smooth(method = "lm", se = FALSE, aes(x = facebook, color = "Facebook")) +
+  geom_smooth(method = "lm", se = FALSE, aes(x = twitter, color = "Twitter")) +
+  geom_smooth(method = "lm", se = FALSE, aes(x = instagram, color = "Instagram")) +
+  geom_smooth(method = "lm", se = FALSE, aes(x = reddit, color = "Reddit")) +
+  geom_smooth(method = "lm", se = FALSE, aes(x = youtube, color = "YouTube")) +
+  geom_smooth(method = "lm", se = FALSE, aes(x = snapchat, color = "Snapchat")) +
+  geom_smooth(method = "lm", se = FALSE, aes(x = tiktok, color = "TikTok")) +
+  labs(
+    x = "Media Use",
+    y = "Toxicity Score",
+    colour = "Platform",
+    title = "Toxicity Comparison between Platform Users and Non-Users"
+  )
 
 
-fb_reg <- tidy(lm(toxicity_score ~ facebook + party_id, data = final))
+fb_reg <- lm(toxicity_score ~ facebook + party + as.factor(user_type), data = final)
 
-twit_reg <- tidy(lm(toxicity_score ~ twitter + party_id, data = final))
+tidy_fb <- fb_reg %>%
+  tidy(conf.int = TRUE) %>%
+  print()
 
-ig_reg <- tidy(lm(toxicity_score ~ instagram + party_id, data = final))
+twit_reg <- lm(toxicity_score ~ twitter + party + as.factor(user_type), data = final)
 
-red_reg <- tidy(lm(toxicity_score ~ reddit + party_id, data = final))
+tidy_twit <- twit_reg %>%
+  tidy(conf.int = TRUE) %>%
+  print()
 
-you_reg <- tidy(lm(toxicity_score ~ youtube + party_id, data = final))
+ig_reg <- lm(toxicity_score ~ instagram + party + as.factor(user_type), data = final)
 
-sc_reg <- tidy(lm(toxicity_score ~ snapchat + party_id, data = final))
+tidy_ig <- ig_reg %>%
+  tidy(conf.int = TRUE) %>%
+  print()
 
-tt_reg <- tidy(lm(toxicity_score ~ tiktok + party_id, data = final))
+red_reg <- lm(toxicity_score ~ reddit + party + as.factor(user_type), data = final)
+
+tidy_red <- red_reg %>%
+  tidy(conf.int = TRUE) %>%
+  print()
+
+you_reg <- lm(toxicity_score ~ youtube + party + as.factor(user_type), data = final)
+
+tidy_you <- you_reg %>%
+  tidy(conf.int = TRUE) %>%
+  print()
+
+sc_reg <- lm(toxicity_score ~ snapchat + party + as.factor(user_type), data = final)
+
+tidy_sc <- sc_reg %>%
+  tidy(conf.int = TRUE) %>%
+  print()
+
+tt_reg <- lm(toxicity_score ~ tiktok + party + as.factor(user_type), data = final)
+
+tidy_tt <- tt_reg %>%
+  tidy(conf.int = TRUE) %>%
+  print()
 
 
 stacked_models <- 
@@ -1198,8 +1332,7 @@ stacked_models <-
     "Snapchat" = tidy(sc_reg, conf.int = TRUE),
     "TikTok" = tidy(tt_reg, conf.int = TRUE),
     .id = "Platform"
-  ) %>%
-  print()
+  )
 
 
 ggplot(stacked_models) +
@@ -1209,6 +1342,9 @@ ggplot(stacked_models) +
     position = position_dodge(width = -0.5)
   ) +
   coord_flip()
+
+
+
 
 
 
